@@ -1,0 +1,1 @@
+2021-03-19 20:39:22	1m 38s	lethal_tesla	ERR	a6dc495f54dc58af6c69b84b7f2b8840	079365b1-7ca5-4b13-93db-7f119e189563	nextflow run metaboigniter/main.nf -profile docker
