@@ -44,4 +44,4 @@ To run the script, you will need to run the command :
 ```
 For the example above, the `path_to_classes_subfolders` is `data/Batch1`.
 
-Congratulations, you now have your .d files converted in .mzML !
+:white_check_mark: Congratulations, you now have your .d files converted in .mzML ! :sunglasses:
