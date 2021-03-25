@@ -7,7 +7,7 @@ The objective of this pipeline is to automate as much as possible the workflow i
 
 ## Convert .d to .mzML files with dockerized msconvert
 
-The point of this first step is to convert your .d into .mzML files. For that, you will use the folder  [test_msconvert](https://github.com/adam-amara/metabopipeline/tree/main/test_msconvert)
+The point of this first step is to convert your .d into .mzML files. For that, you will use the folder  [test_msconvert](https://github.com/adam-amara/metabopipeline/tree/main/test_msconvert). We will also perform centroiding on spectra, to match with metaboigniter, the next step of the workflow.
 
 ### Prepare your data
 
@@ -36,7 +36,21 @@ Your data folder has to verify a two conditions :
 
 In the folder [test_msconvert](https://github.com/adam-amara/metabopipeline/tree/main/test_msconvert), you will find the shell script `dtomzML.sh`.
 
-Running it will create a MZML folder in the working directory. The MZML folder will contain the same subfolders (one for each experimental class) as the organised data folder.
+Running it will create a mzML folder in the working directory. The mzML folder will contain the same subfolders (one for each experimental class) as the organised data folder :
+
+    mzML
+        ├── Blanks
+        │   ├── Blank_1.mzML
+        │   ├── Blank_2.mzML
+        ├── CCs
+        │   ├── CC_1.mzML
+        │   ├── CC_2.mzML
+        ├── QCs
+        │   ├── QC_1.mzML
+        │   ├── QC_2.mzML
+        ├── Samples
+        │   ├── Sample_1.mzML
+        │   ├── Sample_2.mzML
 
 To run the script, you will need to run the command :
 ```shell
