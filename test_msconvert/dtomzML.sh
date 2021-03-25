@@ -1,7 +1,7 @@
 
 docker build -t test_msconvert .
 
-mkdir MZML
+mkdir mzML
 
 folders=$(echo $1 | tr "/" "\n")
 myarray=($folders)
@@ -13,7 +13,7 @@ do
 	cd $DIR
 	FOL=$(basename "$PWD")
 	docker run -it --rm -e WINEDEBUG=-all -v $PWD:/data:rw test_msconvert wine msconvert *.d --zlib --filter "peakPicking true 1-" -o $FOL
-	mv $FOL "${VAR1}MZML"
+	mv $FOL "${VAR1}mzML"
 	cd $VAR1
 done
 
