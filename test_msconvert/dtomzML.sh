@@ -12,7 +12,7 @@ for DIR in ${1}/*
 do
 	cd $DIR
 	FOL=$(basename "$PWD")
-	docker run -it --rm -e WINEDEBUG=-all -v $PWD:/data:rw test_msconvert wine msconvert *.d -o $FOL
+	docker run -it --rm -e WINEDEBUG=-all -v $PWD:/data:rw test_msconvert wine msconvert *.d --zlib --filter "peakPicking true 1-" -o $FOL
 	mv $FOL "${VAR1}MZML"
 	cd $VAR1
 done
