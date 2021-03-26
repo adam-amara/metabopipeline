@@ -23,7 +23,17 @@ path2data = input('Enter relative path to the folder containing all the subfolde
 type_of_ionization = input('What type of ionization do you have ? Enter POS, NEG or BOTH : ')
 
 need_centroiding = input('Does the workflow has to perform the centroiding ? Enter true or false : ')
+
+blank_filter_pos = input('Do you want to remove signal from blank samples ? Enter true or false : ')
+
+blank_class = input('Enter the name of the class of the blank samples : ')
+
+sample_class = input('Enter the name of the class of the biological samples : ')
+
+QC_class = input('Entre the name of the class of the quality controls : ')
+
 print('\n')
+
 
 list_path2data = glob.glob(path2data + '/*')
 
@@ -70,25 +80,60 @@ with open('metaboigniter/conf/parameters.config', 'r') as myfile:
 	filedata = myfile.read()
 
 
-line_input_param = filedata[filedata.find("input = ''"):filedata.find('\n', filedata.find("input = ''"))]
-quant_mzml_files_pos = quant_mzml_files_pos + '/*.mzML'
-line_input_param_replaced = line_input_param.replace("''", "'" + quant_mzml_files_pos + "'", 1)
-
-line_ionization_param = filedata[filedata.find("type_of_ionization = "):filedata.find('\n', filedata.find("type_of_ionization = "))]
+line_type_of_ionization = filedata[filedata.find("type_of_ionization = "):filedata.find('\n', filedata.find("type_of_ionization = "))]
 type_of_ionization = type_of_ionization.lower()
-line_ionization_param_replaced = line_ionization_param.replace('pos', type_of_ionization, 1)
+line_type_of_ionization_replaced = line_type_of_ionization.replace('pos', type_of_ionization, 1)
 
-line_phenotype_param = filedata[filedata.find("phenotype_design_pos = ''"):filedata.find('\n', filedata.find("phenotype_design_pos = ''"))]
-line_phenotype_param_replaced = line_phenotype_param.replace("''", "'" + phenotype_design_pos + "'", 1)
-
-line_centroiding_param = filedata[filedata.find("need_centroiding"):filedata.find('\n', filedata.find("need_centroiding"))]
+line_need_centroiding = filedata[filedata.find("need_centroiding"):filedata.find('\n', filedata.find("need_centroiding"))]
 need_centroiding = need_centroiding.lower()
-line_centroiding_param_replaced = line_centroiding_param.replace('false', need_centroiding, 1)
+line_need_centroiding_replaced = line_need_centroiding.replace('false', need_centroiding, 1)
 
-filedata = filedata.replace(line_input_param, line_input_param_replaced)
-filedata = filedata.replace(line_ionization_param, line_ionization_param_replaced)
-filedata = filedata.replace(line_phenotype_param, line_phenotype_param_replaced)
-filedata = filedata.replace(line_centroiding_param, line_centroiding_param_replaced)
+line_input = filedata[filedata.find("input = ''"):filedata.find('\n', filedata.find("input = ''"))]
+quant_mzml_files_pos = quant_mzml_files_pos + '/*.mzML'
+line_input_replaced = line_input.replace("''", "'" + quant_mzml_files_pos + "'", 1)
+
+line_phenotype_design_pos = filedata[filedata.find("phenotype_design_pos = ''"):filedata.find('\n', filedata.find("phenotype_design_pos = ''"))]
+line_phenotype_design_pos_replaced = line_phenotype_design_pos.replace("''", "'" + phenotype_design_pos + "'", 1)
+
+line_ipo_valueToSelect_pos = filedata[filedata.find("ipo_valueToSelect_pos"):filedata.find('\n', filedata.find("ipo_valueToSelect_pos"))]
+line_ipo_valueToSelect_pos_replaced = line_ipo_valueToSelect_pos.replace('QC', QC_class, 1)
+
+line_sampleclass_quant_pos_xcms = filedata[filedata.find("sampleclass_quant_pos_xcms"):filedata.find('\n', filedata.find("sampleclass_quant_pos_xcms"))]
+line_sampleclass_quant_pos_xcms_replaced = line_sampleclass_quant_pos_xcms.replace('Sample', sample_class, 1)
+
+line_blank_filter_pos = filedata[filedata.find("blank_filter_pos"):filedata.find('\n', filedata.find("blank_filter_pos"))]
+blank_filter_pos = blank_filter_pos.lower()
+line_blank_filter_pos_replaced = line_blank_filter_pos.replace('false', blank_filter_pos, 1)
+
+line_blank_blankfilter_pos_xcms = filedata[filedata.find("blank_blankfilter_pos_xcms"):filedata.find('\n', filedata.find("blank_blankfilter_pos_xcms"))]
+line_blank_blankfilter_pos_xcms_replaced = line_blank_blankfilter_pos_xcms.replace('Blank', blank_class, 1)
+
+line_sample_blankfilter_pos_xcms = filedata[filedata.find("sample_blankfilter_pos_xcms"):filedata.find('\n', filedata.find("sample_blankfilter_pos_xcms"))]
+line_sample_blankfilter_pos_xcms_replaced = line_sample_blankfilter_pos_xcms.replace('Sample', sample_class, 1)
+
+line_qc_cvfilter_pos_xcms = filedata[filedata.find("qc_cvfilter_pos_xcms"):filedata.find('\n', filedata.find("qc_cvfilter_pos_xcms"))]
+line_qc_cvfilter_pos_xcms_replaced = line_qc_cvfilter_pos_xcms.replace('QC', QC_class, 1)
+
+line_selected_type_output_pos_camera = filedata[filedata.find("selected_type_output_pos_camera"):filedata.find('\n', filedata.find("selected_type_output_pos_camera"))]
+line_selected_type_output_pos_camera_replaced = line_selected_type_output_pos_camera.replace('Sample', sample_class, 1)
+
+line_sampleclass_quant_library_pos_xcms = filedata[filedata.find("sampleclass_quant_library_pos_xcms"):filedata.find('\n', filedata.find("sampleclass_quant_library_pos_xcms"))]
+line_sampleclass_quant_library_pos_xcms_replaced = line_sampleclass_quant_library_pos_xcms.replace('Sample', sample_class, 1)
+
+
+
+filedata = filedata.replace(line_type_of_ionization, line_type_of_ionization_replaced)
+filedata = filedata.replace(line_need_centroiding, line_need_centroiding_replaced)
+filedata = filedata.replace(line_input, line_input_replaced)
+filedata = filedata.replace(line_phenotype_design_pos, line_phenotype_design_pos_replaced)
+filedata = filedata.replace(line_ipo_valueToSelect_pos, line_ipo_valueToSelect_pos_replaced)
+filedata = filedata.replace(line_sampleclass_quant_pos_xcms, line_sampleclass_quant_pos_xcms_replaced)
+filedata = filedata.replace(line_blank_filter_pos, line_blank_filter_pos_replaced)
+filedata = filedata.replace(line_blank_blankfilter_pos_xcms, line_blank_blankfilter_pos_xcms_replaced)
+filedata = filedata.replace(line_sample_blankfilter_pos_xcms, line_sample_blankfilter_pos_xcms_replaced)
+filedata = filedata.replace(line_qc_cvfilter_pos_xcms, line_qc_cvfilter_pos_xcms_replaced)
+filedata = filedata.replace(line_selected_type_output_pos_camera, line_selected_type_output_pos_camera_replaced)
+filedata = filedata.replace(line_sampleclass_quant_library_pos_xcms, line_sampleclass_quant_library_pos_xcms_replaced)
 
 
 with open('metaboigniter/conf/parameters.config', 'w') as myfile:
@@ -103,12 +148,20 @@ print('==> parameters (input, type_of_ionization, phenotype_design_pos, need_cen
 '''
 TODO :
 Manage the following parameters :
-- input = '' ### OK
+- type_of_ionization = '' ### set to pos
+- need_centroiding = false ### set to false
+- input = '' ### set to data/mzML
 - quant_mzml_files_neg = '' ### No NEG for now
-- type_of_ionization = '' ### OK
-- phenotype_design_pos = '' ### OK
+- phenotype_design_pos = '' ### set to 'data/phenotype_files/phenotype_POS.csv"
 - phenotype_design_neg = '' ### No NEG for now
-
+- ipo_valueToSelect_pos = 'QC' ### set to 'QCs'
+- sampleclass_quant_pos_xcms = 'Sample' ### set to 'Samples'
+- blank_filter_pos = false ### set to true
+- blank_blankfilter_pos_xcms = 'Blank' ### set to 'Blanks'
+- sample_blankfilter_pos_xcms = 'Sample' ### set to 'Samples'
+- qc_cvfilter_pos_xcms = 'QC' ### set to 'QCs'
+- selected_type_output_pos_camera = 'Sample' ### set to 'Samples'
+- sampleclass_quant_library_pos_xcms = 'Sample' ### set to 'Samples'
 '''
 
 print('\n')
