@@ -1,0 +1,176 @@
+import subprocess
+import sys
+import os
+import glob
+
+import numpy as np
+import pandas as pd
+
+print('\n')
+print('######################################')
+print('################ START ###############')
+print('######################################')
+print('\n')
+
+'''
+- This part allows to organize the mzML files as described in https://github.com/nf-core/metaboigniter/blob/dev/docs/metaboigniter_guide.md 
+- path2data is the relative path to the folder containing all the subfolders (one for each condition) which contain the mzML files
+- It creates a folder
+'''
+
+path2data = input('Enter relative path to the folder containing all the subfolders (one for each condition) which contain the mzML files : ')
+
+type_of_ionization = input('What type of ionization do you have ? Enter POS, NEG or BOTH : ')
+
+need_centroiding = input('Does the workflow has to perform the centroiding ? Enter true or false : ')
+
+blank_filter_pos = input('Do you want to remove signal from blank samples ? Enter true or false : ')
+
+blank_class = input('Enter the name of the class of the blank samples : ')
+
+sample_class = input('Enter the name of the class of the biological samples : ')
+
+QC_class = input('Entre the name of the class of the quality controls : ')
+
+print('\n')
+
+
+list_path2data = glob.glob(path2data + '/*')
+
+quant_mzml_files_pos = '/'.join(path2data.split('/')[:-1]) + '/mzML_' + type_of_ionization + '_Quant'
+print('==> All the mzML files will be copied in a same folder (', quant_mzml_files_pos, ') for the process')
+subprocess.run(['mkdir', quant_mzml_files_pos])
+print('==> Creation of the folder', quant_mzml_files_pos)
+
+list_infos = []
+
+for path in list_path2data:
+
+	list_mzMLfile = [mzMLfile for mzMLfile in os.listdir(path) if not mzMLfile.startswith('.')]
+
+	for mzMLfile in list_mzMLfile:
+
+		infos_curr = []
+
+		infos_curr.append(mzMLfile)
+		infos_curr.append(path.split('/')[-1])
+
+		list_infos.append(infos_curr)
+
+		subprocess.run(['cp', path + '/' + mzMLfile, quant_mzml_files_pos])
+
+print('==> The mzML files has been successfully copied in the same folder (', quant_mzml_files_pos, ')\n')
+
+print('==> Preparation of the phenotype files')
+phenotype_file_infos = np.asarray(list_infos)
+output_path_phenotype = '/'.join(path2data.split('/')[:-1]) + '/phenotype_files'
+subprocess.run(['mkdir', output_path_phenotype])
+print('==> Creation of the folder', output_path_phenotype)
+phenotype_design_pos = output_path_phenotype + '/phenotype_' + type_of_ionization + '.csv'
+pd.DataFrame(phenotype_file_infos).to_csv(phenotype_design_pos, header=['RawFile', 'Class'])
+print('==> The phenotype files has been successfully copied in the folder', output_path_phenotype, '\n')
+
+
+
+
+print("==> Modification of parameter's values in parameters.config file")
+
+with open('metaboigniter/conf/parameters.config', 'r') as myfile:
+
+	filedata = myfile.read()
+
+
+line_type_of_ionization = filedata[filedata.find("type_of_ionization = "):filedata.find('\n', filedata.find("type_of_ionization = "))]
+type_of_ionization = type_of_ionization.lower()
+line_type_of_ionization_replaced = line_type_of_ionization.replace('pos', type_of_ionization, 1)
+
+line_need_centroiding = filedata[filedata.find("need_centroiding"):filedata.find('\n', filedata.find("need_centroiding"))]
+need_centroiding = need_centroiding.lower()
+line_need_centroiding_replaced = line_need_centroiding.replace('false', need_centroiding, 1)
+
+line_input = filedata[filedata.find("input = ''"):filedata.find('\n', filedata.find("input = ''"))]
+quant_mzml_files_pos = quant_mzml_files_pos + '/*.mzML'
+line_input_replaced = line_input.replace("''", "'" + quant_mzml_files_pos + "'", 1)
+
+line_phenotype_design_pos = filedata[filedata.find("phenotype_design_pos = ''"):filedata.find('\n', filedata.find("phenotype_design_pos = ''"))]
+line_phenotype_design_pos_replaced = line_phenotype_design_pos.replace("''", "'" + phenotype_design_pos + "'", 1)
+
+line_ipo_valueToSelect_pos = filedata[filedata.find("ipo_valueToSelect_pos"):filedata.find('\n', filedata.find("ipo_valueToSelect_pos"))]
+line_ipo_valueToSelect_pos_replaced = line_ipo_valueToSelect_pos.replace('QC', QC_class, 1)
+
+line_sampleclass_quant_pos_xcms = filedata[filedata.find("sampleclass_quant_pos_xcms"):filedata.find('\n', filedata.find("sampleclass_quant_pos_xcms"))]
+line_sampleclass_quant_pos_xcms_replaced = line_sampleclass_quant_pos_xcms.replace('Sample', sample_class, 1)
+
+line_blank_filter_pos = filedata[filedata.find("blank_filter_pos"):filedata.find('\n', filedata.find("blank_filter_pos"))]
+blank_filter_pos = blank_filter_pos.lower()
+line_blank_filter_pos_replaced = line_blank_filter_pos.replace('false', blank_filter_pos, 1)
+
+line_blank_blankfilter_pos_xcms = filedata[filedata.find("blank_blankfilter_pos_xcms"):filedata.find('\n', filedata.find("blank_blankfilter_pos_xcms"))]
+line_blank_blankfilter_pos_xcms_replaced = line_blank_blankfilter_pos_xcms.replace('Blank', blank_class, 1)
+
+line_sample_blankfilter_pos_xcms = filedata[filedata.find("sample_blankfilter_pos_xcms"):filedata.find('\n', filedata.find("sample_blankfilter_pos_xcms"))]
+line_sample_blankfilter_pos_xcms_replaced = line_sample_blankfilter_pos_xcms.replace('Sample', sample_class, 1)
+
+line_qc_cvfilter_pos_xcms = filedata[filedata.find("qc_cvfilter_pos_xcms"):filedata.find('\n', filedata.find("qc_cvfilter_pos_xcms"))]
+line_qc_cvfilter_pos_xcms_replaced = line_qc_cvfilter_pos_xcms.replace('QC', QC_class, 1)
+
+line_selected_type_output_pos_camera = filedata[filedata.find("selected_type_output_pos_camera"):filedata.find('\n', filedata.find("selected_type_output_pos_camera"))]
+line_selected_type_output_pos_camera_replaced = line_selected_type_output_pos_camera.replace('Sample', sample_class, 1)
+
+line_sampleclass_quant_library_pos_xcms = filedata[filedata.find("sampleclass_quant_library_pos_xcms"):filedata.find('\n', filedata.find("sampleclass_quant_library_pos_xcms"))]
+line_sampleclass_quant_library_pos_xcms_replaced = line_sampleclass_quant_library_pos_xcms.replace('Sample', sample_class, 1)
+
+
+
+filedata = filedata.replace(line_type_of_ionization, line_type_of_ionization_replaced)
+filedata = filedata.replace(line_need_centroiding, line_need_centroiding_replaced)
+filedata = filedata.replace(line_input, line_input_replaced)
+filedata = filedata.replace(line_phenotype_design_pos, line_phenotype_design_pos_replaced)
+filedata = filedata.replace(line_ipo_valueToSelect_pos, line_ipo_valueToSelect_pos_replaced)
+filedata = filedata.replace(line_sampleclass_quant_pos_xcms, line_sampleclass_quant_pos_xcms_replaced)
+filedata = filedata.replace(line_blank_filter_pos, line_blank_filter_pos_replaced)
+filedata = filedata.replace(line_blank_blankfilter_pos_xcms, line_blank_blankfilter_pos_xcms_replaced)
+filedata = filedata.replace(line_sample_blankfilter_pos_xcms, line_sample_blankfilter_pos_xcms_replaced)
+filedata = filedata.replace(line_qc_cvfilter_pos_xcms, line_qc_cvfilter_pos_xcms_replaced)
+filedata = filedata.replace(line_selected_type_output_pos_camera, line_selected_type_output_pos_camera_replaced)
+filedata = filedata.replace(line_sampleclass_quant_library_pos_xcms, line_sampleclass_quant_library_pos_xcms_replaced)
+
+
+with open('metaboigniter/conf/parameters.config', 'w') as myfile:
+
+	myfile.write(filedata)
+
+print('==> parameters (input, type_of_ionization, phenotype_design_pos, need_centroiding) has been successfully modified in parameters_replaced.config file')
+
+
+
+
+'''
+TODO :
+Manage the following parameters :
+- type_of_ionization = '' ### set to pos
+- need_centroiding = false ### set to false
+- input = '' ### set to data/mzML
+- quant_mzml_files_neg = '' ### No NEG for now
+- phenotype_design_pos = '' ### set to 'data/phenotype_files/phenotype_POS.csv"
+- phenotype_design_neg = '' ### No NEG for now
+- ipo_valueToSelect_pos = 'QC' ### set to 'QCs'
+- sampleclass_quant_pos_xcms = 'Sample' ### set to 'Samples'
+- blank_filter_pos = false ### set to true
+- blank_blankfilter_pos_xcms = 'Blank' ### set to 'Blanks'
+- sample_blankfilter_pos_xcms = 'Sample' ### set to 'Samples'
+- qc_cvfilter_pos_xcms = 'QC' ### set to 'QCs'
+- selected_type_output_pos_camera = 'Sample' ### set to 'Samples'
+- sampleclass_quant_library_pos_xcms = 'Sample' ### set to 'Samples'
+'''
+
+print('\n')
+print('######################################')
+print('################  END  ###############')
+print('######################################')
+print('\n')
+
+
+
+
+
