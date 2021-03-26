@@ -1,5 +1,0 @@
-task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
-1	a2/373892	19177	get_software_versions	COMPLETED	0	2021-03-19 20:39:28.808	411ms	322ms	-	-	-	-	-
-6	e4/516fef	19199	process_masstrace_detection_pos_xcms_noncentroided (null)	FAILED	125	2021-03-19 20:39:29.001	817ms	766ms	-	-	-	-	-
-8	2c/f94305	19229	process_masstrace_detection_pos_xcms_noncentroided (null)	FAILED	125	2021-03-19 20:39:29.229	665ms	570ms	-	-	-	-	-
-3	12/0a99cf	19270	process_masstrace_detection_pos_xcms_noncentroided (null)	FAILED	125	2021-03-19 20:39:29.824	375ms	281ms	-	-	-	-	-
