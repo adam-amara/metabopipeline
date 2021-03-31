@@ -26,6 +26,8 @@ need_centroiding = input('Does the workflow has to perform the centroiding ? Ent
 
 blank_filter_pos = input('Do you want to remove signal from blank samples ? Enter true or false : ')
 
+rename_output_pos_camera = input('Do you want to remane the samples in the output file ? Enter true or false : ')
+
 blank_class = input('Enter the name of the class of the blank samples : ')
 
 sample_class = input('Enter the name of the class of the biological samples : ')
@@ -38,6 +40,7 @@ print('\n')
 list_path2data = glob.glob(path2data + '/*')
 
 quant_mzml_files_pos = '/'.join(path2data.split('/')[:-1]) + '/mzML_' + type_of_ionization + '_Quant'
+
 print('==> All the mzML files will be copied in a same folder (', quant_mzml_files_pos, ') for the process')
 subprocess.run(['mkdir', quant_mzml_files_pos])
 print('==> Creation of the folder', quant_mzml_files_pos)
@@ -52,12 +55,17 @@ for path in list_path2data:
 
 		infos_curr = []
 
-		infos_curr.append(mzMLfile)
+		old_path = path + '/' + mzMLfile
+
+		new_name = path.split('/')[-1] + mzMLfile
+
+		subprocess.run(['cp', old_path, quant_mzml_files_pos])
+		subprocess.run(['mv', quant_mzml_files_pos + '/' + mzMLfile, quant_mzml_files_pos + '/' + new_name])
+
+		infos_curr.append(new_name)
 		infos_curr.append(path.split('/')[-1])
 
 		list_infos.append(infos_curr)
-
-		subprocess.run(['cp', path + '/' + mzMLfile, quant_mzml_files_pos])
 
 print('==> The mzML files has been successfully copied in the same folder (', quant_mzml_files_pos, ')\n')
 
@@ -67,7 +75,13 @@ output_path_phenotype = '/'.join(path2data.split('/')[:-1]) + '/phenotype_files'
 subprocess.run(['mkdir', output_path_phenotype])
 print('==> Creation of the folder', output_path_phenotype)
 phenotype_design_pos = output_path_phenotype + '/phenotype_' + type_of_ionization + '.csv'
-pd.DataFrame(phenotype_file_infos).to_csv(phenotype_design_pos, header=['RawFile', 'Class'])
+
+with open(phenotype_design_pos, 'w') as myfile:
+	myfile.write('RawFile,Class,\n')
+	for elt in list_infos:
+		myfile.write(elt[0] + ',' + elt[1] + ',\n')
+
+# pd.DataFrame(phenotype_file_infos).to_csv(phenotype_design_pos, header=['RawFile', 'Class'])
 print('==> The phenotype files has been successfully copied in the folder', output_path_phenotype, '\n')
 
 
@@ -117,8 +131,17 @@ line_qc_cvfilter_pos_xcms_replaced = line_qc_cvfilter_pos_xcms.replace('QC', QC_
 line_selected_type_output_pos_camera = filedata[filedata.find("selected_type_output_pos_camera"):filedata.find('\n', filedata.find("selected_type_output_pos_camera"))]
 line_selected_type_output_pos_camera_replaced = line_selected_type_output_pos_camera.replace('Sample', sample_class, 1)
 
+line_rename_output_pos_camera = filedata[filedata.find("rename_output_pos_camera"):filedata.find('\n', filedata.find("rename_output_pos_camera"))]
+line_rename_output_pos_camera_replaced = line_rename_output_pos_camera.replace('true', rename_output_pos_camera, 1)
+
 line_sampleclass_quant_library_pos_xcms = filedata[filedata.find("sampleclass_quant_library_pos_xcms"):filedata.find('\n', filedata.find("sampleclass_quant_library_pos_xcms"))]
 line_sampleclass_quant_library_pos_xcms_replaced = line_sampleclass_quant_library_pos_xcms.replace('Sample', sample_class, 1)
+
+
+
+
+
+
 
 
 
@@ -133,6 +156,7 @@ filedata = filedata.replace(line_blank_blankfilter_pos_xcms, line_blank_blankfil
 filedata = filedata.replace(line_sample_blankfilter_pos_xcms, line_sample_blankfilter_pos_xcms_replaced)
 filedata = filedata.replace(line_qc_cvfilter_pos_xcms, line_qc_cvfilter_pos_xcms_replaced)
 filedata = filedata.replace(line_selected_type_output_pos_camera, line_selected_type_output_pos_camera_replaced)
+filedata = filedata.replace(line_rename_output_pos_camera, line_rename_output_pos_camera_replaced)
 filedata = filedata.replace(line_sampleclass_quant_library_pos_xcms, line_sampleclass_quant_library_pos_xcms_replaced)
 
 
