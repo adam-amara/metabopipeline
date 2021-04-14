@@ -1,0 +1,7 @@
+sampleMetadata	Class	Groups	X
+LivCan_299_014.mzML	Sample	Non-case	NA
+LivCan_085_018.mzML	Sample	Non-case	NA
+LivCan_300_015.mzML	Sample	Incident	NA
+LivCan_309_020.mzML	Sample	Incident	NA
+LivCan_086_019.mzML	Sample	Non-case	NA
+LivCan_363_016.mzML	Sample	Non-case	NA
