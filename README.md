@@ -4,58 +4,110 @@
 
 The objective of this pipeline is to automate as much as possible the workflow in untargeted metabolomics, from the raw data to the identification of relevant compound.
 
+Here is an example with HCC dataset.
 
-## Convert .d to .mzML files with dockerized msconvert
+## Data structure
 
-The point of this first step is to convert your .d into .mzML files. For that, you will use the folder  [test_msconvert](https://github.com/adam-amara/metabopipeline/tree/main/test_msconvert). We will also perform centroiding on spectra, to match with metaboigniter, the next step of the workflow.
+Below is the organisation of our data.
 
-### Prepare your data
+In the folder pipeline_dataHCC, we have 2 subfolders and 2 scripts :
+    - dataHCC : where the data are converted and saved 
+    - metaboigniter : GitHub repository from nf-core/metaboigniter
+    - prepare_metaboigniter.py
+    - run_all.sh
 
-In the folder [test_msconvert](https://github.com/adam-amara/metabopipeline/tree/main/test_msconvert), you have to copy your data folder. This data folder has to be organised in a certain form, with an example below :
 
-    data
-        ├── Batch1
-        │   ├── Blanks
-        │   │   ├── Blank_1.d
-        │   │   ├── Blank_2.d
-        │   ├── CCs
-        │   │   ├── CC_1.d
-        │   │   ├── CC_2.d
-        │   ├── QCs
-        │   │   ├── QC_1.d
-        │   │   ├── QC_2.d
-        │   ├── Samples
-        │   │   ├── Sample_1.d
-        │   │   ├── Sample_2.d
+    pipeline_dataHCC
+        ├── dataHCC
+        │   ├── dtomzML
+        │   │   ├── dataHCC_d
+        │   │   │   ├── Blank
+        │   │   │   │   ├── Blank_001.d
+        │   │   │   ├── MSMS
+        │   │   │   │   ├── AutoMSMS_018.d
+        │   │   │   ├── QC
+        │   │   │   │   ├── QC41_013.d
+        │   │   │   │   ├── QC41_026.d
+        │   │   │   ├── Sample
+        │   │   │   │   ├── LivCan_085_018.d
+        │   │   │   │   ├── LivCan_086_019.d
+        │   │   │   │   ├── LivCan_299_014.d
+        │   │   │   │   ├── LivCan_300_015.d
+        │   │   │   │   ├── LivCan_309_020.d
+        │   │   │   │   ├── LivCan_363_016.d
+        │   │   ├── dockerfile
+        │   │   ├── dtomzML.sh
+        │   ├── hmdb
+        │   │   ├── hmdb_2017-07-23.csv
+        ├── metaboigniter
+        ├── prepare_metaboigniter.py
+        ├── run_all.sh
+        
+In the first part, we will convert the raw data (.d files into .mzML).
 
-Your data folder has to verify a two conditions :
-- The .d files has to be organised in separate subfolders, one for each experimental class (Blanks, CCs, QCs, Samples, ...)
-- The subfolder names, corresponding to the experimental classes (Blanks, CCs, QCs, Samples, ...) must not have space characters.
+In the second part, we will run the metaboigniter pipeline with our data (.mzML files) and our specific parameters.
 
-### Run the shell script
 
-In the folder [test_msconvert](https://github.com/adam-amara/metabopipeline/tree/main/test_msconvert), you will find the shell script `dtomzML.sh`.
+## 1 - Convert .d to .mzML files with dockerized msconvert
 
-Running it will create a mzML folder in the working directory. The mzML folder will contain the same subfolders (one for each experimental class) as the organised data folder :
+The point of this first step is to convert the .d into .mzML files. For that, we will use the command :
+```bash
+cd dataHCC/dtomzML
+```
 
-    mzML
-        ├── Blanks
-        │   ├── Blank_1.mzML
-        │   ├── Blank_2.mzML
-        ├── CCs
-        │   ├── CC_1.mzML
-        │   ├── CC_2.mzML
-        ├── QCs
-        │   ├── QC_1.mzML
-        │   ├── QC_2.mzML
-        ├── Samples
-        │   ├── Sample_1.mzML
-        │   ├── Sample_2.mzML
-
-To run the script, you will need to run the command :
-```shell
+Then, we run the command :
+```bash
 ./dtomzML.sh <path_to_classes_subfolders>
 ```
-For the example above, the `path_to_classes_subfolders` is `data/Batch1`.
 
-:white_check_mark: Congratulations, you now have your .d files converted in .mzML ! :sunglasses:
+For our example :
+```bash
+./dtomzML.sh dataHCC_d
+```
+
+The shell script uses the dockerized image of msconvert to perform the conversion and peak picking of the raw data. In `pipeline_dataHCC/dataHCC/dtomzML`, we now have a folder named `mzML` with the same structure as the folder `dataHCC_d` and our converted files.
+
+
+
+## 2 - Run metaboigniter pipeline
+
+Now that we have our mzML files, let's run metaboigniter to perform the quantification and identification !
+
+We run the command to set the working directory to `pipeline_dataHCC` :
+```bash
+cd ../..
+```
+
+Now we run the shell script `run_all.sh` :
+```bash
+./run_all.sh
+```
+
+The script first launches the python script `prepare_metaboigniter.py` to set the most important parameters needed to set to the metaboigniter config file `metaboigniter/conf/parameters.config` .
+Here are the input which work on our data :
+- Enter relative path to the folder containing all the subfolders (one for each condition) which contain the mzML files : `dataHCC/dtomzML/mzML`
+- What type of ionization do you have ? Enter POS, NEG or BOTH : `POS`
+- Does the workflow has to perform the centroiding ? Enter true or false : `false`
+- Do you want to remove signal from blank samples ? Enter true or false : `true`
+- Do you want to rename the samples in the output file ? Enter true or false : `false`
+- Enter the name of the class of the blank samples : `Blank`
+- Enter the name of the class of the biological samples : `Sample`
+- Entre the name of the class of the quality controls : `QC`
+- Do you want to perform identification ? Enter true or false : `true`
+- Enter the name of the class of the MS2 samples : `MSMS`
+- Enter relative path to csv database : `dataHCC/hmdb/hmdb_2017-07-23.csv`
+
+Then the shell script runs metaboigniter through nextflow and the docker image.
+
+
+
+:white_check_mark: We have now a `results` folder with the outputs of metaboigniter :sunglasses:
+
+
+
+
+
+
+
+
+
