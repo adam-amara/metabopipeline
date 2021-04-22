@@ -6,11 +6,12 @@ The objective of this pipeline is to automate as much as possible the workflow i
 
 Here is an example with HCC dataset.
 
-## Data structure
+## 0 - Data structure
 
 Below is the organisation of our data.
 
 In the folder pipeline_dataHCC, we have 2 subfolders and 2 scripts :
+
     - dataHCC : where the data are converted and saved 
     - metaboigniter : GitHub repository from nf-core/metaboigniter
     - prepare_metaboigniter.py
