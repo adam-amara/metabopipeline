@@ -1,0 +1,8 @@
+
+
+singularity build --sandbox test_msconvert/ docker://chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest
+
+
+### singularity run --writable --bind $PWD:/data:rw test_msconvert/ wine msconvert *.d -o $PWD
+
+
