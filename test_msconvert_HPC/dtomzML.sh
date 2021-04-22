@@ -1,5 +1,7 @@
 
 
+singularity build --sandbox test_msconvert/ docker://chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest
+
 mkdir mzML
 
 folders=$(echo $1 | tr "/" "\n")
