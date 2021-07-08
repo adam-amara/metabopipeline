@@ -223,11 +223,11 @@ For further analysis, we prefer to have variables (i.e. compounds) in columns an
 - Groups : Incident or Non-case
 
 At the end of this notebook, our peak table looks like that :
-| SampleID               | variable_3  | variable_5 | ... |
-| :--------------------- | :----------: | :----------: | :---: |
-| LivCan_153.mzML | 19.7617... | 14.5368... | ... |
-| LivCan_154.mzML | 19.7352... | 15.1933... | ... |
-| ...                            | ...              | ...              | ... |
+| SampleID               | Groups     | variable_3  | variable_5 | ... |
+| :--------------------- | :----------: | :----------: | :----------: | :---: |
+| LivCan_153.mzML | Incident    | 19.7617... | 14.5368... | ... |
+| LivCan_154.mzML | Non-case | 19.7352... | 15.1933... | ... |
+| ...                            | ...              | ...              | ...              | ... |
 
 
 
